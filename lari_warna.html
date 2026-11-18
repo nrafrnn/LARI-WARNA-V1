@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lari Warna</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#E4F1E8;--ink:#243238;--muted:#4A5C63;--panel:#fff;--hijau:#2E7D32;--hijau-g:#1B5E20;--font:"Baloo 2","Trebuchet MS",system-ui,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181b}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);padding:12px max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px))}
+.stage{position:relative;width:100%;max-width:1000px;margin:0 auto;aspect-ratio:16/10;container-type:inline-size;overflow:hidden;border-radius:18px;background:#F4FBF8;box-shadow:0 8px 30px rgba(36,50,56,.25);user-select:none;-webkit-user-select:none;touch-action:none}
+canvas.main{position:absolute;inset:0;width:100%;height:100%}
+button{font-family:var(--font);cursor:pointer}button:focus-visible{outline:.5cqw solid #1E88E5;outline-offset:.3cqw}
+.opt{font:700 max(11px,2.2cqw)/1 var(--font);padding:.9cqw 2cqw;border-radius:99px;border:.3cqw solid var(--ink);background:#fff;color:var(--ink)}
+.opt[aria-pressed="true"]{background:var(--ink);color:#fff}
+.hud{position:absolute;left:2cqw;right:2cqw;top:2cqw;display:grid;grid-template-columns:1fr auto 1fr;gap:2cqw;align-items:start;pointer-events:none}
+.hud>*{pointer-events:auto}.hr{justify-self:end;display:flex;flex-direction:column;gap:1cqw;align-items:flex-end}
+.pr{background:#fffd;border-radius:2cqw;padding:.6cqw 1.6cqw;font:800 max(11px,2.6cqw) var(--font);color:#243238}
+.card{display:flex;align-items:center;gap:2cqw;background:#fff;color:#243238;border:.5cqw solid transparent;border-radius:3cqw;padding:.8cqw 3cqw .8cqw 2cqw;box-shadow:0 .8cqw 2.4cqw #2432384d}
+.card.ok{border-color:#2E7D32}.card.no{border-color:#B39DDB}
+.card .e{font-size:max(40px,12cqw);line-height:1}.card .n{font:800 max(16px,4.4cqw)/1 var(--font)}
+.sx{font:700 max(11px,2.6cqw)/1.1 var(--font);color:#4A5C63;margin-top:.5cqw}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6cqw;padding:2cqw;text-align:center;background:#F4FBF8e6;overflow:auto;color:#243238}
+.screen[hidden],.hud[hidden]{display:none}
+h1,h2{margin:0;font:800 max(20px,6cqw)/1 var(--font)}h2{font-size:max(18px,4.6cqw)}
+.chips{display:flex;gap:1.4cqw}.chip{font:800 max(11px,2.8cqw)/1 var(--font);padding:.6cqw 2.4cqw;border-radius:99px;color:#fff}
+.row{display:flex;gap:1.2cqw;flex-wrap:wrap;justify-content:center;align-items:center}
+.lbl{font:700 max(11px,2.2cqw) var(--font);color:#4A5C63}
+.char{background:#fff;border:.4cqw solid #243238;border-radius:2.4cqw;padding:.6cqw 2cqw;font:800 max(12px,2.4cqw) var(--font);color:#243238}
+.char[aria-pressed="true"]{background:#2E7D32;color:#fff;border-color:#1B5E20}
+.char canvas{display:block;width:10cqw;height:12.5cqw}
+.btn{border:0;border-radius:99px;color:#fff;background:#2E7D32;font:800 max(16px,4.6cqw)/1 var(--font);padding:1cqw 7cqw 1.2cqw;box-shadow:0 .7cqw 0 #1B5E20}
+.btn:active{transform:translateY(.5cqw)}
+.how{margin:0;font:600 max(10px,2.1cqw)/1.3 var(--font);max-width:80cqw}
+.big{font-size:max(18px,6cqw);color:#FFB800;letter-spacing:.5cqw}
+.tg{display:flex;align-items:center;gap:1cqw;font:700 max(11px,2.2cqw) var(--font)}
+.tg input,.tg select{font:inherit;accent-color:#2E7D32}
+</style></head><body>
+<div class="stage" id="stage">
+<canvas class="main" id="c" role="img" aria-label="Permainan lari tiga lorong dengan pintu warna"></canvas>
+<div class="hud" id="hud" hidden>
+ <button class="opt" id="bMenu">← Menu</button>
+ <div class="card" id="card"><div class="e" id="cE"></div><div><div class="n" id="cN"></div><div class="sx" id="cS"></div></div></div>
+ <div class="hr"><div class="pr" id="pr"></div><button class="opt" id="bMus" aria-pressed="true">🎵</button></div>
+</div>
+<section class="screen" id="sMenu">
+ <h1>Lari Warna!</h1>
+ <div class="chips" aria-hidden="true"><span class="chip" style="background:#E53935">MERAH</span><span class="chip" style="background:#FDD835;color:#243238">KUNING</span><span class="chip" style="background:#1E88E5">BIRU</span></div>
+ <div class="row"><span class="lbl">Pilih watak:</span>
+  <button class="char" id="chB" aria-pressed="true"><canvas width="160" height="200"></canvas>Lelaki</button>
+  <button class="char" id="chG" aria-pressed="false"><canvas width="160" height="200"></canvas>Perempuan</button></div>
+ <div class="row" id="lvRow"><span class="lbl">Tahap:</span></div>
+ <p class="how">Gerakkan jari atau mouse, atau tekan ← →. Lari ke pintu yang sama warna dengan gambar. Putar telefon ke mod landskap.</p>
+ <button class="btn" id="bPlay">MAIN</button>
+ <div class="row"><button class="opt" id="bMus2" aria-pressed="true">🎵 Muzik</button><button class="opt" id="bT">⚙ Panel Cikgu</button><button class="opt" id="bFs">⛶ Skrin penuh</button></div>
+ <div class="lbl" id="modeLbl"></div>
+</section>
+<section class="screen" id="sEnd" hidden>
+ <h2 id="eT">Tahniah! 🎉</h2><div class="big" id="eS"></div><div class="how" id="eX"></div>
+ <button class="btn" id="bAgain">MAIN LAGI</button><button class="opt" id="bMenu2">← Menu</button>
+</section>
+<section class="screen" id="sT" hidden></section>
+</div>
+<script>
+(function(){'use strict';
+var $=function(i){return document.getElementById(i)};
+var st=$('stage'),cv=$('c'),cx=cv.getContext('2d'),W=1000,H=625;
+function fit(){var d=Math.min(2,window.devicePixelRatio||1);W=st.clientWidth;H=W*.625;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)}
+new ResizeObserver(fit).observe(st);fit();
+var K=['merah','kuning','biru'];
+var COL={merah:['#E53935','#9F1D1B','MERAH','#fff'],kuning:['#FDD835','#B98A00','KUNING','#243238'],biru:['#1E88E5','#0B4F9C','BIRU','#fff']};
+var OBJ={merah:[['🍎','Epal'],['🍓','Strawberi'],['🌹','Bunga ros'],['🌶️','Cili'],['🚒','Lori bomba']],kuning:[['🍌','Pisang'],['☀️','Matahari'],['🌻','Bunga matahari'],['🐥','Anak ayam'],['🍋','Lemon']],biru:[['🌊','Laut'],['💧','Titisan air'],['🦋','Rama-rama'],['🐳','Ikan paus'],['🫐','Beri biru']]};
+var LV=[{n:'Tahap 1 · Mula',sp:.8,hint:1,lab:1},{n:'Tahap 2 · Sederhana',sp:1.1,hint:0,lab:1},{n:'Tahap 3 · Mahir',sp:1.5,hint:0,lab:0}];
+var PRE={biasa:{speed:1,hint:0,labels:0,read:0,retry:0,n:9,calm:0,simple:0,fixed:0,music:.5},
+autisme:{speed:.7,hint:1,labels:1,read:1,retry:1,n:6,calm:1,simple:0,fixed:1,music:.25},
+adhd:{speed:1,hint:1,labels:1,read:1,retry:0,n:6,calm:0,simple:1,fixed:0,music:.5},
+pbm:{speed:.55,hint:1,labels:1,read:1,retry:1,n:6,calm:1,simple:1,fixed:0,music:.3}};
+var MN={biasa:'Biasa',autisme:'Autisme',adhd:'ADHD',pbm:'Masalah Pembelajaran'};
+var MD={biasa:'Permainan standard untuk kebanyakan murid.',autisme:'Tenang dan boleh diramal: susunan pintu tetap (merah, kuning, biru), tiada kilat, goncang atau konfeti, muzik perlahan, kelajuan rendah, soalan dibaca dengan suara, soalan diulang tanpa tekanan.',adhd:'Sesi pendek (6 soalan), latar ringkas tanpa gangguan, maklum balas segera, petunjuk sentiasa ada, soalan dibaca dengan suara.',pbm:'Sangat perlahan, petunjuk dan label sentiasa ada, soalan dibaca dengan suara, soalan diulang sehingga betul, latar ringkas.'};
+var cfg=Object.assign({mode:'biasa',musicOn:true},PRE.biasa),boy=true,lvl=0,G=null,SC=0;
+try{var sv=JSON.parse(localStorage.getItem('lw_cfg'));if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+function save(){try{localStorage.setItem('lw_cfg',JSON.stringify(cfg))}catch(e){}}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+/* ---------- bunyi ---------- */
+var AC,MG,SG,nt=0,sp=0,mt=null;
+function audio(){try{if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();MG=AC.createGain();MG.connect(AC.destination);SG=AC.createGain();SG.gain.value=.6;SG.connect(AC.destination)}AC.resume()}catch(e){}}
+function mf(m){return 440*Math.pow(2,(m-69)/12)}
+function note(m,t,d,v,ty,de){var o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=mf(m);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(de||MG);o.start(t);o.stop(t+d+.05)}
+var ML=[[72,76,79,76,72,76,79,84],[69,72,76,72,69,72,76,81],[77,81,77,72,77,81,84,81],[74,79,83,79,74,79,83,79]],BS=[48,45,53,55];
+function sched(){if(!AC)return;if(!cfg.musicOn){nt=AC.currentTime+.1;return}var e=cfg.calm?.34:.27;while(nt<AC.currentTime+.3){var b=Math.floor(sp/8)%4,k=sp%8;note(ML[b][k],nt,e*1.6,.2,'triangle');if(k%2===0)note(BS[b]+(k===4?7:0),nt,e*1.8,.28,'sine');if(k%2===1&&!cfg.calm)note(96,nt,.04,.02,'square');nt+=e;sp++}}
+function music(){if(!AC)return;MG.gain.value=cfg.musicOn?cfg.music:0;if(!mt){nt=AC.currentTime+.1;mt=setInterval(sched,100)}}
+function sfx(ok){if(!AC)return;var t=AC.currentTime;if(ok){note(84,t,.25,.22,'sine',SG);note(88,t+.1,.25,.22,'sine',SG);note(91,t+.2,.45,.22,'sine',SG)}else{note(64,t,.4,.16,'sine',SG);note(60,t+.18,.5,.16,'sine',SG)}}
+function say(x){if(!cfg.read||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(x);u.lang='ms-MY';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+/* ---------- lukisan ---------- */
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function chr(c,x,y,u,b,t,j){var s=Math.sin(t*11)*u*.45,sh=b?'#00897B':'#7E57C2';y-=j;c.save();c.lineCap='round';
+c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(x,y+j,u*.8,u*.22,0,0,7);c.fill();
+c.strokeStyle='#37474F';c.lineWidth=u*.32;c.beginPath();c.moveTo(x-u*.3,y-u*1.6);c.lineTo(x-u*.3+s,y);c.moveTo(x+u*.3,y-u*1.6);c.lineTo(x+u*.3-s,y);c.stroke();
+c.strokeStyle=sh;c.lineWidth=u*.3;c.beginPath();c.moveTo(x-u*.7,y-u*3.2);c.lineTo(x-u*.95,y-u*2.1+s*.5);c.moveTo(x+u*.7,y-u*3.2);c.lineTo(x+u*.95,y-u*2.1-s*.5);c.stroke();
+c.fillStyle=sh;rr(c,x-u*.7,y-u*3.5,u*1.4,u*2,u*.4);c.fill();
+if(!b){c.fillStyle='#212121';c.beginPath();c.ellipse(x+u*.95,y-u*4,u*.35,u*.75,.3,0,7);c.fill()}
+c.fillStyle='#E8B48A';c.beginPath();c.arc(x,y-u*4.4,u*.9,0,7);c.fill();
+c.fillStyle=b?'#3E2723':'#212121';c.beginPath();c.arc(x,y-u*4.5,u*.95,Math.PI,0);c.fill();
+if(!b){c.fillStyle='#AB47BC';c.beginPath();c.arc(x+u*.7,y-u*5,u*.3,0,7);c.fill()}
+c.fillStyle='#243238';c.beginPath();c.arc(x-u*.3,y-u*4.3,u*.1,0,7);c.arc(x+u*.3,y-u*4.3,u*.1,0,7);c.fill();
+c.strokeStyle='#243238';c.lineWidth=u*.08;c.beginPath();c.arc(x,y-u*4.1,u*.3,.2,Math.PI-.2);c.stroke();c.restore()}
+function prev(id,b){var c=$(id).querySelector('canvas').getContext('2d');c.clearRect(0,0,160,200);chr(c,80,185,26,b,0,0)}
+function f(p){return .03+.97*Math.pow(Math.max(p,0),1.7)}
+function lw(d){return W*(.03+.27*d)}
+function draw(){var hor=H*.36,py=H*.86,dB=(H-hor)/(py-hor),T=G?G.t:0,cal=cfg.calm,gs=G&&G.ph!=='done'?G:null;
+var g=cx.createLinearGradient(0,0,0,hor);g.addColorStop(0,'#BDE6F5');g.addColorStop(1,'#F4FBF8');cx.fillStyle=g;cx.fillRect(0,0,W,hor);
+cx.fillStyle='#A5D6A7';cx.fillRect(0,hor,W,H-hor);
+cx.fillStyle='#9AA9B0';cx.beginPath();cx.moveTo(W/2-1.5*lw(0),hor);cx.lineTo(W/2+1.5*lw(0),hor);cx.lineTo(W/2+1.5*lw(dB),H);cx.lineTo(W/2-1.5*lw(dB),H);cx.fill();
+cx.strokeStyle='#fff';var step=.1,o=(SC*.3)%step;
+for(var u=-step+o;u<1.3;u+=step){var a=f(u),b=f(u+step*.5);if(u<0)a=f(0);cx.lineWidth=Math.max(1,5*b);[-.5,.5].forEach(function(s){cx.beginPath();cx.moveTo(W/2+s*lw(a),hor+(py-hor)*a);cx.lineTo(W/2+s*lw(b),hor+(py-hor)*b);cx.stroke()})}
+if(!cfg.simple)for(var k=0;k<6;k++){var uu=(k/6+SC*.05)%1,d=f(uu),y=hor+(py-hor)*d;[-1,1].forEach(function(s){var x=W/2+s*(1.5*lw(d)+W*.1*d+W*.03);cx.fillStyle='#795548';cx.fillRect(x-W*.008*d*2,y-H*.12*d,W*.016*d*2,H*.12*d);cx.fillStyle='#2E7D32';cx.beginPath();cx.arc(x,y-H*.16*d,H*.07*d,0,7);cx.fill()})}
+if(gs&&(gs.ph==='run'||gs.ph==='res')&&gs.p>.02&&gs.p<1.4){var q=gs.qs[gs.i],d=f(gs.p),yb=hor+(py-hor)*d,gh=H*.36*d,gw=lw(d)*.88,al=gs.ph==='res'?Math.max(0,1-(gs.p-1)*2.5):1,lab=cfg.labels||LV[lvl].lab,hint=(cfg.hint||LV[lvl].hint)&&gs.ph==='run';
+cx.globalAlpha=al;for(var i=0;i<3;i++){var k2=gs.gates[i],x=W/2+(i-1)*lw(d);cx.save();
+if(hint&&k2===q.k){cx.shadowColor='#fff';cx.shadowBlur=30*d*(1+.5*Math.sin(gs.t*6))}
+cx.fillStyle=COL[k2][0];cx.strokeStyle=hint&&k2===q.k?'#fff':COL[k2][1];cx.lineWidth=Math.max(2,(hint&&k2===q.k?9:5)*d);rr(cx,x-gw/2,yb-gh,gw,gh,gw*.15);cx.fill();cx.stroke();cx.restore();
+if(lab&&gh>24){cx.fillStyle=COL[k2][3];cx.font='800 '+gh*.22+'px '+'"Baloo 2",sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(COL[k2][2],x,yb-gh*.55)}}
+cx.globalAlpha=1}
+var lx=gs?gs.lx:1,j=gs&&gs.jt>=0?Math.sin(Math.PI*gs.jt)*H*.1:0,u2=H*.036;
+chr(cx,W/2+(lx-1)*lw(1),py,u2,boy,gs&&gs.ph!=='ready'?T:0,j);
+if(gs)gs.pts.forEach(function(p){cx.fillStyle=p.c;cx.fillRect(p.x,p.y,W*.012,W*.012)})}
+/* ---------- permainan ---------- */
+function spd(){return LV[lvl].sp*cfg.speed}
+function show(s){['sMenu','sEnd','sT'].forEach(function(i){$(i).hidden=i!==s});$('hud').hidden=s!==null}
+function begin(){var qs=[];for(var i=0;i<cfg.n;i++)qs.push(K[i%3]);if(!cfg.fixed)qs=shuffle(qs);
+qs=qs.map(function(k){var o=OBJ[k][Math.floor(Math.random()*5)];return{k:k,e:o[0],n:o[1]}});
+G={qs:qs,i:0,score:0,first:true,lane:1,lx:1,p:0,ph:'ready',tm:0,t:0,pts:[],jt:-1,ok:false};audio();music();show(null);nextQ()}
+function nextQ(){var q=G.qs[G.i];G.gates=cfg.fixed?K.slice():shuffle(K);G.p=0;G.ph='ready';G.tm=0;
+$('cE').textContent=q.e;$('cN').textContent=q.n;$('cS').textContent='Sedia… Warna apa?';$('card').className='card';
+$('pr').textContent=(G.i+1)+' / '+G.qs.length+'  ⭐ '+G.score;say(q.n+'. Warna apa?')}
+function resolve(){var q=G.qs[G.i],ok=G.gates[G.lane]===q.k;G.ok=ok;G.ph='res';G.tm=0;sfx(ok);
+if(ok){if(G.first)G.score++;G.jt=0;$('card').className='card ok';$('cS').textContent='Betul! Ini warna '+COL[q.k][2]+' 🎉';say('Betul! '+COL[q.k][2]);
+if(!cfg.calm)for(var i=0;i<26;i++)G.pts.push({x:W/2,y:H*.6,vx:(Math.random()-.5)*W*.9,vy:-Math.random()*H*.9,c:COL[K[i%3]][0]})}
+else{$('card').className='card no';$('cS').textContent=cfg.retry?'Cuba lagi, awak boleh! 💜':'Ini warna '+COL[q.k][2];say(cfg.retry?'Cuba lagi':'Ini warna '+COL[q.k][2])}
+$('pr').textContent=(G.i+1)+' / '+G.qs.length+'  ⭐ '+G.score}
+function advance(){if(!G.ok&&cfg.retry){G.first=false;nextQ();return}G.i++;G.first=true;if(G.i>=G.qs.length)finish();else nextQ()}
+function finish(){G.ph='done';var r=G.score/G.qs.length,s=r>=.85?3:r>=.55?2:1;if(cfg.retry)s=Math.max(s,2);
+$('eS').textContent='★'.repeat(s)+'☆'.repeat(3-s);$('eX').textContent='Jawab betul kali pertama: '+G.score+' / '+G.qs.length+'. '+(s===3?'Hebat sekali!':'Bagus! Mari cuba lagi.');show('sEnd');say('Tahniah! Awak hebat!')}
+var last=0;
+function tick(ts){var dt=Math.min(.05,(ts-last)/1000);last=ts;SC+=dt*(G&&G.ph==='run'||G&&G.ph==='res'?spd():.25);
+if(G&&G.ph!=='done'){G.t+=dt;G.lx+=(G.lane-G.lx)*Math.min(1,dt*12);if(G.jt>=0){G.jt+=dt*1.6;if(G.jt>1)G.jt=-1}
+if(G.ph==='ready'){G.tm+=dt;if(G.tm>(cfg.calm?2.2:1.2)){G.ph='run';$('cS').textContent='Warna apa?'}}
+else if(G.ph==='run'){G.p+=dt/(5.5/spd());if(G.p>=1)resolve()}
+else if(G.ph==='res'){G.p+=dt/(5.5/spd())*1.3;G.tm+=dt;if(G.tm>(cfg.calm?2.6:1.9))advance()}
+G.pts.forEach(function(p){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=H*2*dt});G.pts=G.pts.filter(function(p){return p.y<H})}
+draw();requestAnimationFrame(tick)}
+function setLane(l){if(G&&G.ph!=='done')G.lane=Math.max(0,Math.min(2,l))}
+document.addEventListener('keydown',function(e){if(!G||G.ph==='done'||$('sT').hidden===false)return;if(e.key==='ArrowLeft'||e.key==='a')setLane(G.lane-1);if(e.key==='ArrowRight'||e.key==='d')setLane(G.lane+1)});
+function ptr(e){if(e.target!==cv)return;var r=cv.getBoundingClientRect();setLane(Math.floor((e.clientX-r.left)/r.width*3))}
+cv.addEventListener('pointerdown',function(e){audio();ptr(e)});cv.addEventListener('pointermove',function(e){if(e.buttons||e.pointerType==='touch')ptr(e)});
+/* ---------- menu & panel cikgu ---------- */
+function refresh(){$('modeLbl').textContent='Mod: '+MN[cfg.mode];$('bMus').setAttribute('aria-pressed',cfg.musicOn);$('bMus2').setAttribute('aria-pressed',cfg.musicOn);$('bMus').textContent=cfg.musicOn?'🎵':'🔇';
+$('chB').setAttribute('aria-pressed',boy);$('chG').setAttribute('aria-pressed',!boy);
+document.querySelectorAll('.lv').forEach(function(b,i){b.setAttribute('aria-pressed',i===lvl)})}
+LV.forEach(function(l,i){var b=document.createElement('button');b.className='opt lv';b.textContent=l.n;b.onclick=function(){lvl=i;refresh()};$('lvRow').appendChild(b)});
+function toggleMus(){cfg.musicOn=!cfg.musicOn;save();audio();music();refresh()}
+$('bMus').onclick=toggleMus;$('bMus2').onclick=toggleMus;
+$('chB').onclick=function(){boy=true;refresh()};$('chG').onclick=function(){boy=false;refresh()};
+$('bPlay').onclick=begin;$('bAgain').onclick=begin;
+function menu(){if(window.speechSynthesis)speechSynthesis.cancel();G=null;show('sMenu');refresh()}
+$('bMenu').onclick=menu;$('bMenu2').onclick=menu;
+$('bFs').onclick=function(){try{document.fullscreenElement?document.exitFullscreen():st.requestFullscreen()}catch(e){}};
+function panel(){var h='<h2>⚙ Panel Cikgu</h2><div class="row">';
+Object.keys(MN).forEach(function(m){h+='<button class="opt pm" data-m="'+m+'" aria-pressed="'+(cfg.mode===m)+'">'+MN[m]+'</button>'});
+h+='</div><p class="how">'+MD[cfg.mode]+'</p><div class="row">';
+[['read','Baca soalan dengan suara'],['hint','Petunjuk pintu sentiasa'],['labels','Label warna pada pintu'],['retry','Ulang soalan jika salah'],['calm','Visual tenang'],['fixed','Susunan tetap']].forEach(function(x){h+='<label class="tg"><input type="checkbox" data-k="'+x[0]+'"'+(cfg[x[0]]?' checked':'')+'>'+x[1]+'</label>'});
+h+='</div><div class="row"><label class="tg">Soalan <select data-k="n">';[3,6,9,12].forEach(function(n){h+='<option'+(cfg.n===n?' selected':'')+'>'+n+'</option>'});
+h+='</select></label><label class="tg">Kelajuan <select data-k="speed">';[[.5,'Sangat perlahan'],[.7,'Perlahan'],[1,'Biasa']].forEach(function(s){h+='<option value="'+s[0]+'"'+(cfg.speed===s[0]?' selected':'')+'>'+s[1]+'</option>'});
+h+='</select></label></div><button class="btn" id="bOk">SIMPAN</button>';$('sT').innerHTML=h;
+document.querySelectorAll('.pm').forEach(function(b){b.onclick=function(){cfg=Object.assign(cfg,PRE[b.dataset.m],{mode:b.dataset.m});panel()}});
+document.querySelectorAll('#sT input').forEach(function(i){i.onchange=function(){cfg[i.dataset.k]=i.checked?1:0}});
+document.querySelectorAll('#sT select').forEach(function(s){s.onchange=function(){cfg[s.dataset.k]=+s.value}});
+$('bOk').onclick=function(){save();if(MG)MG.gain.value=cfg.musicOn?cfg.music:0;show('sMenu');refresh()}}
+$('bT').onclick=function(){panel();show('sT')};
+prev('chB',true);prev('chG',false);refresh();requestAnimationFrame(tick);
+})();
+</script></body></html>
